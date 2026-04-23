@@ -9,6 +9,8 @@ namespace efmssql;
 
 public sealed class ChinookContainer : IAsyncDisposable
 {
+    private static readonly HttpClient HttpClient = new();
+
     private readonly MsSqlContainer _container;
 
     private ChinookContainer(MsSqlContainer container, string connectionString)
@@ -27,8 +29,7 @@ public sealed class ChinookContainer : IAsyncDisposable
 
         await sqlContainer.StartAsync();
 
-        using var httpClient = new HttpClient();
-        var chinookScript = await httpClient.GetStringAsync("https://github.com/lerocha/chinook-database/releases/download/v1.4.5/Chinook_SqlServer_AutoIncrementPKs.sql");
+        var chinookScript = await HttpClient.GetStringAsync("https://github.com/lerocha/chinook-database/releases/download/v1.4.5/Chinook_SqlServer_AutoIncrementPKs.sql");
         var result = await sqlContainer.ExecScriptAsync(chinookScript);
         if (result.ExitCode != 0)
         {
