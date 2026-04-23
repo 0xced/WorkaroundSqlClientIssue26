@@ -21,7 +21,7 @@ public sealed class ChinookContainer : IAsyncDisposable
 
     public static async Task<ChinookContainer> StartAsync(Action<string>? logWriter = null)
     {
-        var sqlContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
+        var sqlContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2025-latest")
             .WithName("efmssql")
             .WithLogger(new TestcontainersLogger(logWriter))
             .WithReuse(true)
