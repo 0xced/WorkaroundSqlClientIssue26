@@ -37,9 +37,18 @@ public class FixSqlClientIssue26ExecutionStrategy(ExecutionStrategyDependencies 
         {
             return await base.ExecuteAsync(state, operation, verifySucceeded, cancellationToken);
         }
-        catch (Exception exception) when (exception is not OperationCanceledException && cancellationToken.IsCancellationRequested)
+        catch (Exception exception) when (ShouldWrap(exception, cancellationToken))
         {
             throw new OperationCanceledException(OperationCanceledMessage, exception, cancellationToken);
         }
+    }
+
+    private static bool ShouldWrap(Exception exception, CancellationToken cancellationToken)
+    {
+        return exception switch
+        {
+            OperationCanceledException oce when oce.CancellationToken == cancellationToken => false,
+            _ => cancellationToken.IsCancellationRequested,
+        };
     }
 }
