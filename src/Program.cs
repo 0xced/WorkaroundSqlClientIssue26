@@ -29,7 +29,7 @@ var cancellationToken = interceptor.CancellationToken;
 var optionsBuilder = new DbContextOptionsBuilder<ChinookContext>()
     .AddInterceptors(interceptor)
     .LogTo(AnsiConsole.WriteLine, [CoreEventId.QueryCanceled, CoreEventId.QueryIterationFailed])
-    .UseSqlServer(sqlContainer.ConnectionString, useWorkaround ? sql => sql.ExecutionStrategy(FixSqlClientIssue26ExecutionStrategy.Create) : null);
+    .UseSqlServer(sqlContainer.ConnectionString, useWorkaround ? sql => sql.WorkaroundSqlClientIssue26() : null);
 
 await using var context = new ChinookContext(optionsBuilder.Options);
 if (ensureCreated)
