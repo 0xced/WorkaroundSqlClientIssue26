@@ -14,6 +14,7 @@ AnsiConsole.WriteLine($"🛢 SQL Server database available on {sqlContainer.Conn
 
 var useWorkaround = !args.Contains("--no-workaround");
 var ensureCreated = !args.Contains("--skip-init");
+var noDelay = args.Contains("--no-delay");
 
 var cancelDelay = ensureCreated ? 2 : 5;
 AnsiConsole.WriteLine($"⏱️ Canceling after {cancelDelay} ms");
@@ -23,7 +24,7 @@ if (useWorkaround)
 }
 
 // A few ms after ReaderExecutingAsync is a good timing to get an exception that is not TaskCanceledException: A task was canceled.
-var interceptor = new CancellationInterceptor(cancelDelay);
+var interceptor = new CancellationInterceptor(noDelay ? 0 : cancelDelay);
 var cancellationToken = interceptor.CancellationToken;
 var optionsBuilder = new DbContextOptionsBuilder<ChinookContext>()
     .AddInterceptors(interceptor)
@@ -45,7 +46,7 @@ try
     var count = await context.Tracks.CountAsync(cancellationToken);
     AnsiConsole.WriteLine($"✅ {count} tracks");
 }
-catch (OperationCanceledException exception)
+catch (OperationCanceledException exception) when (exception.CancellationToken == cancellationToken)
 {
     AnsiConsole.WriteLine($"⚪️ {exception.Message}");
     if (exception.InnerException != null)
