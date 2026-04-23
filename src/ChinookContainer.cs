@@ -21,7 +21,6 @@ public sealed class ChinookContainer : IAsyncDisposable
     {
         var sqlContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
             .WithName("efmssql")
-            .WithLabel("dev.orbstack.icon", "https://i.snipboard.io/fgmW7M.jpg")
             .WithLogger(new TestcontainersLogger(logWriter))
             .WithReuse(true)
             .Build();
