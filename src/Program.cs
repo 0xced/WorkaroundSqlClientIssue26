@@ -13,49 +13,59 @@ var sqlContainer = await AnsiConsole.Status()
 AnsiConsole.WriteLine($"🛢 SQL Server database available on {sqlContainer.ConnectionString}");
 
 var useWorkaround = !args.Contains("--no-workaround");
-var ensureCreated = !args.Contains("--skip-init");
-var noDelay = args.Contains("--no-delay");
-
-var cancelDelay = ensureCreated ? 2 : 5;
-AnsiConsole.WriteLine($"⏱️ Canceling after {cancelDelay} ms");
 if (useWorkaround)
 {
     AnsiConsole.WriteLine($"✳️ Using issue #26 workaround ({nameof(FixSqlClientIssue26ExecutionStrategy)})");
 }
 
-// A few ms after ReaderExecutingAsync is a good timing to get an exception that is not TaskCanceledException: A task was canceled.
-var interceptor = new CancellationInterceptor(noDelay ? 0 : cancelDelay);
-var cancellationToken = interceptor.CancellationToken;
+var cancellationMessage = GetCancellationMessage(args);
+AnsiConsole.WriteLine($"✋ Cancelling on {cancellationMessage}");
+
 var optionsBuilder = new DbContextOptionsBuilder<ChinookContext>()
-    .AddInterceptors(interceptor)
     .LogTo(AnsiConsole.WriteLine, [CoreEventId.QueryCanceled, CoreEventId.QueryIterationFailed])
     .UseSqlServer(sqlContainer.ConnectionString, useWorkaround ? sql => sql.WorkaroundSqlClientIssue26() : null);
 
 await using var context = new ChinookContext(optionsBuilder.Options);
-if (ensureCreated)
-{
-    // Without "initializing things" (dotnet run -- --skip-init) => System.InvalidOperationException: Operation cancelled by user.
-    // When "initializing things" upfront (_ = await context.Database.EnsureCreatedAsync()) => Microsoft.Data.SqlClient.SqlException (0x80131904): A severe error occurred on the current command.  The results, if any, should be discarded.
-    AnsiConsole.WriteLine("➡️ await context.Database.EnsureCreatedAsync()");
-    _ = await context.Database.EnsureCreatedAsync();
-}
+AnsiConsole.WriteLine("➡️ await context.Database.EnsureCreatedAsync()");
+await context.Database.EnsureCreatedAsync();
+
+using var cancellationEventListener = new CancellationEventListener(cancellationMessage);
+var cancellationToken = cancellationEventListener.CancellationToken;
 
 try
 {
     AnsiConsole.WriteLine("➡️ context.Tracks.CountAsync(cancellationToken)");
     var count = await context.Tracks.CountAsync(cancellationToken);
     AnsiConsole.WriteLine($"✅ {count} tracks");
+    return 0;
 }
 catch (OperationCanceledException exception) when (exception.CancellationToken == cancellationToken)
 {
-    AnsiConsole.WriteLine($"⚪️ {exception.Message}");
-    if (exception.InnerException != null)
-    {
-        AnsiConsole.WriteException(exception.InnerException, ExceptionFormats.ShortenPaths | ExceptionFormats.ShortenTypes);
-    }
+    AnsiConsole.WriteLine($"⏹️ (wrapped: {(exception.InnerException != null ? "yes" : "no")}) {exception.Message}");
+    AnsiConsole.WriteException(exception.InnerException ?? exception, ExceptionFormats.ShortenPaths | ExceptionFormats.ShortenTypes);
+    return 130;
 }
 catch (Exception exception)
 {
     AnsiConsole.WriteLine("❌ An unexpected exception occured");
     AnsiConsole.WriteException(exception, ExceptionFormats.ShortenPaths | ExceptionFormats.ShortenTypes);
+    return 1;
+}
+
+static string GetCancellationMessage(string[] args)
+{
+    if (args.Length > 0)
+    {
+        switch (args[0])
+        {
+            case "TaskCanceledException":
+                return "SqlConnection.InternalOpenAsync"; // TaskCanceledException exception with default cancellation token => wrapped: yes
+            case "SqlException":
+                return "SniTcpHandle.ReceiveAsync"; // SqlException: A severe error occurred on the current command. The results, if any, should be discarded. Operation cancelled by user. => wrapped: yes
+            case "InvalidOperationException":
+                return "SqlCommand.WriteBeginExecuteEvent"; // InvalidOperationException: Operation cancelled by user. => wrapped: yes
+        }
+    }
+
+    return "TdsParserStateObjectManaged.ReadAsyncCallback"; // TaskCanceledException exception with proper cancellation token => wrapped: no
 }
