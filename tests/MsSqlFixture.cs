@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Testcontainers.MsSql;
@@ -14,7 +16,11 @@ public partial class MsSqlFixture(IMessageSink messageSink) : ContainerFixture<M
 
     public string ConnectionString => new SqlConnectionStringBuilder(Container.GetConnectionString()) { InitialCatalog = "Chinook_AutoIncrement" }.ConnectionString;
 
-    protected override MsSqlBuilder Configure() => new MsSqlBuilder("mcr.microsoft.com/mssql/server:2025-latest").WithReuse(true).WithName("WorkaroundSqlClientIssue26.Tests");
+    protected override MsSqlBuilder Configure()
+    {
+        var targetFramework = typeof(MsSqlFixture).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>().FirstOrDefault(e => e.Key == "TargetFramework")?.Value ?? "NA";
+        return new MsSqlBuilder("mcr.microsoft.com/mssql/server:2025-latest").WithReuse(true).WithName($"WorkaroundSqlClientIssue26.Tests-{targetFramework}");
+    }
 
     protected override async ValueTask InitializeAsync()
     {

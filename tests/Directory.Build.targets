@@ -1,34 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project>
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <OutputType>Exe</OutputType>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="10.0.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
-    <PackageReference Include="PublicApiGenerator" Version="11.5.4" />
-    <PackageReference Include="ReportGenerator" Version="5.5.6" PrivateAssets="all" />
-    <PackageReference Include="Testcontainers.MsSql" Version="4.11.0" />
-    <PackageReference Include="Testcontainers.XunitV3" Version="4.11.0" />
-    <PackageReference Include="Verify.XunitV3" Version="31.16.2" />
-    <PackageReference Include="xunit.v3" Version="3.2.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" PrivateAssets="all" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <VSTestLogger Include="trx%3BLogFileName=$(MSBuildProjectName).trx" Visible="false" />
-    <VSTestLogger Include="html%3BLogFileName=$(MSBuildProjectName).html" Visible="false" />
-  </ItemGroup>
-
-  <PropertyGroup Label="Coverage">
     <CoverageReportDirectory>$([System.IO.Path]::Combine($(ArtifactsPath),'coverage',$(TargetFramework)))</CoverageReportDirectory>
     <VSTestResultsDirectory>$([System.IO.Path]::Combine($(ArtifactsPath),'test-results',$(TargetFramework)))</VSTestResultsDirectory>
-    <VSTestCollect>XPlat Code Coverage</VSTestCollect>
-    <VSTestLogger>@(VSTestLogger)</VSTestLogger>
   </PropertyGroup>
 
   <Target Name="GenerateCoverageReports" AfterTargets="VSTest" Condition="$(TargetFramework) != ''">
@@ -64,14 +38,5 @@
     <!-- executing "explorer path\to\index.html" returns exit code 1, so we ignore it -->
     <Exec WorkingDirectory="$(CoverageReportDirectory)" Command="$(OpenCommand) index.html" Condition="$(OpenCommand) != ''" IgnoreExitCode="true" />
   </Target>
-
-  <ItemGroup>
-    <ProjectReference Include="../src/WorkaroundSqlClientIssue26.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="PublicApi.*.cs" />
-    <None Include="PublicApi.*.cs" />
-  </ItemGroup>
 
 </Project>

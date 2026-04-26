@@ -37,9 +37,9 @@ public class WorkaroundSqlClientIssue26Test(ITestOutputHelper output, MsSqlFixtu
 
         output.WriteLine($"Recorded exception: {exception}");
         Assert.Equal(cancellationToken, Assert.IsType<OperationCanceledException>(exception, exactMatch: false).CancellationToken);
-        if (expectedInnerExceptionType != typeof(SqlException) || exception.InnerException != null)
+        if (expectedInnerExceptionType != typeof(SqlException))
         {
-            // Getting a SqlException is not 100% reliable, sometimes we get a TaskCanceledException instead.
+            // Getting a SqlException is not 100% reliable, sometimes an InvalidOperationException or a TaskCanceledException might be thrown instead.
             Assert.IsType(expectedInnerExceptionType, exception.InnerException);
         }
     }

@@ -13,7 +13,17 @@
   <Folder Name="/Meta/workflows/">
     <File Path=".github/workflows/continuous-integration.yml" />
   </Folder>
-  <Project Path="src/WorkaroundSqlClientIssue26.csproj" />
-  <Project Path="tests/WorkaroundSqlClientIssue26.Tests.csproj" />
-  <Project Path="tools/scaffold/scaffold.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/WorkaroundSqlClientIssue26.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <File Path="tests/Directory.Build.props" />
+    <File Path="tests/Directory.Build.targets" />
+    <Project Path="tests/EF8/WorkaroundSqlClientIssue26.EF8.Tests.csproj" />
+    <Project Path="tests/EF9/WorkaroundSqlClientIssue26.EF9.Tests.csproj" />
+    <Project Path="tests/EF10/WorkaroundSqlClientIssue26.EF10.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/scaffold/scaffold.csproj" />
+  </Folder>
 </Solution>
