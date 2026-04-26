@@ -1,11 +1,11 @@
 using System;
 using System.Diagnostics.Tracing;
 using System.Threading;
-using Spectre.Console;
+using Xunit;
 
-namespace efmssql;
+namespace WorkaroundSqlClientIssue26.Tests;
 
-public sealed class CancellationEventListener(string cancellationMessage) : EventListener
+public sealed class CancellationEventListener(ITestOutputHelper output, string cancellationMessage) : EventListener
 {
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private DateTime? _initialTimeStamp;
@@ -30,8 +30,8 @@ public sealed class CancellationEventListener(string cancellationMessage) : Even
         if (messageIndex >= 0)
         {
             var message = eventData.Payload?[messageIndex.Value] as string;
-            var cancel = message?.Contains(cancellationMessage) == true;
-            AnsiConsole.WriteLine($"{(cancel ? "🛑" : "💬")} {(eventData.TimeStamp - _initialTimeStamp.Value).TotalMicroseconds:N0} {message}");
+            var cancel = message?.Contains(cancellationMessage) == true && !_cancellationTokenSource.IsCancellationRequested;
+            output.WriteLine($"{(cancel ? "🛑" : "💬")} {(eventData.TimeStamp - _initialTimeStamp.Value).TotalMicroseconds:N0} {message}");
             if (cancel)
             {
                 _cancellationTokenSource.Cancel();

@@ -5,7 +5,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using Testcontainers.MsSql;
 
-namespace efmssql;
+namespace scaffold;
 
 public sealed class ChinookContainer : IAsyncDisposable
 {
@@ -22,9 +22,7 @@ public sealed class ChinookContainer : IAsyncDisposable
     public static async Task<ChinookContainer> StartAsync(Action<string>? logWriter = null)
     {
         var sqlContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2025-latest")
-            .WithName("efmssql")
             .WithLogger(new TestcontainersLogger(logWriter))
-            .WithReuse(true)
             .Build();
 
         await sqlContainer.StartAsync();

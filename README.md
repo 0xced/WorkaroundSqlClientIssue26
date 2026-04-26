@@ -1,6 +1,18 @@
+Work around Microsoft SqlClient issue #26 for EF Core
+
+[![NuGet](https://img.shields.io/nuget/v/WorkaroundSqlClientIssue26.svg?label=NuGet&logo=NuGet)](https://www.nuget.org/packages/WorkaroundSqlClientIssue26/) [![Continuous Integration](https://img.shields.io/github/actions/workflow/status/0xced/WorkaroundSqlClientIssue26/continuous-integration.yml?branch=main&label=Continuous%20Integration&logo=GitHub)](https://github.com/0xced/WorkaroundSqlClientIssue26/actions/workflows/continuous-integration.yml) [![Coverage](https://img.shields.io/codecov/c/github/0xced/WorkaroundSqlClientIssue26?label=Coverage&logo=Codecov&logoColor=f5f5f5)](https://codecov.io/gh/0xced/WorkaroundSqlClientIssue26)
+
 The goal of this project is to reproduce and workaround an old and still unaddressed SqlClient issue (#26): [Cancelling an async SqlClient operation throws SqlException, not TaskCanceledException](https://github.com/dotnet/SqlClient/issues/26)
 
 I was bitten by this issue when using [Blazor virtualization](https://learn.microsoft.com/en-us/aspnet/core/blazor/components/virtualization#item-provider-delegate) where an `OperationCanceledException` is expected to signal cancelation: https://github.com/dotnet/aspnetcore/blob/v9.0.10/src/Components/Web/src/Virtualization/Virtualize.cs#L437
+
+## Getting started
+
+Add the [WorkaroundSqlClientIssue26](https://www.nuget.org/packages/WorkaroundSqlClientIssue26/) NuGet package to your project using the NuGet Package Manager or run the following command:
+
+```sh
+dotnet add package WorkaroundSqlClientIssue26
+```
 
 ## Reproducing the issue
 

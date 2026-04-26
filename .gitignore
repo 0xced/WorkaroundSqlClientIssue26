@@ -1,5 +1,4 @@
-bin
-obj
-.vs/
-.idea/
 *.user
+artifacts/
+.idea/
+.vs/
