@@ -1,5 +1,5 @@
 ﻿[assembly: System.CLSCompliant(false)]
-[assembly: System.Reflection.AssemblyMetadata("RepositoryUrl", "https://github.com/0xced/efmssql")]
+[assembly: System.Reflection.AssemblyMetadata("RepositoryUrl", "https://github.com/0xced/WorkaroundSqlClientIssue26")]
 [assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v8.0", FrameworkDisplayName=".NET 8.0")]
 namespace Microsoft.EntityFrameworkCore
 {
