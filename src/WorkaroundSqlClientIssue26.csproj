@@ -68,6 +68,7 @@
 
   <Target Name="ValidateNuGetPackage" AfterTargets="Pack">
     <Exec Command="dotnet tool restore" />
+    <Exec Command="dotnet validate package local %(NuGetPackOutput.FullPath)" Condition="'%(Extension)' == '.nupkg'" />
   </Target>
 
 </Project>
