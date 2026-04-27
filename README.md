@@ -11,11 +11,11 @@ This project provides a workaround that leverages EF Core [execution strategies]
 ```c#
 try
 {
-    await dbContext.Tracks.CountAsync(cancellationToken);
+  await dbContext.Tracks.CountAsync(cancellationToken);
 }
-catch (OperationCanceledException exception) when (exception.CancellationToken == cancellationToken)
+catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
 {
-    // Alwas caught with the workaround applied. Not caught when using SqlClient default behavior.
+  // Alwas caught with the workaround applied. Uncaught with SqlClient default behavior.
 }
 ```
 
@@ -31,16 +31,16 @@ Install the workaround when configuring the db context options.
 
 ```c#
 var options = new DbContextOptionsBuilder<MyDbContext>()
-    .UseSqlServer(connectionString, sql => sql.WorkAroundSqlClientIssue26())
-    .Options;
+  .UseSqlServer(connectionString, sql => sql.WorkAroundSqlClientIssue26())
+  .Options;
 ```
 
 This workaround is also compatible with a [custom execution strategy](https://learn.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency#custom-execution-strategy) such as retry on failure.
 
 ```c#
 var options = new DbContextOptionsBuilder<MyDbContext>()
-    .UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure().WorkAroundSqlClientIssue26())
-    .Options;
+  .UseSqlServer(connectionString, s => s.EnableRetryOnFailure().WorkAroundSqlClientIssue26())
+  .Options;
 ```
 
 ## Frequently Asked Questions
