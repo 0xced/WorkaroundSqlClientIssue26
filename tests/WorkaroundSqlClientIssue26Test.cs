@@ -26,6 +26,14 @@ public class WorkaroundSqlClientIssue26Test(ITestOutputHelper output, MsSqlFixtu
     public async Task TestRetryOnFailureAndWorkaround(string cancellationMessage, Type expectedInnerExceptionType)
         => await ExecuteTestAsync(cancellationMessage, expectedInnerExceptionType, sql => sql.EnableRetryOnFailure().WorkAroundSqlClientIssue26());
 
+    [Theory, MemberData(nameof(TestData))]
+    public async Task TestRecordRetryOnFailureAndWorkaround(string cancellationMessage, Type expectedInnerExceptionType)
+    {
+        RecordRetryingStrategy strategy = null!;
+        await ExecuteTestAsync(cancellationMessage, expectedInnerExceptionType, sql => sql.ExecutionStrategy(d => strategy = new RecordRetryingStrategy(d)).WorkAroundSqlClientIssue26());
+        Assert.False(Assert.Single(strategy.ShouldRetry));
+    }
+
     private async Task ExecuteTestAsync(string cancellationMessage, Type expectedInnerExceptionType, Action<SqlServerDbContextOptionsBuilder> sqlServerOptionsAction)
     {
         using var cancellationEventListener = new CancellationEventListener(output, cancellationMessage);
